@@ -1,0 +1,16 @@
+#include "tlpi_hdr.h"
+
+int main (int argc, char* argv[])
+{
+  char** p;
+  for (p=argv;p!=NULL;p++)
+    puts(*p);
+  printf("\n");
+  // ---------------------------------- //
+  // Implements this commented out code for echoing the input
+  // ---------------------------------- //
+  int j;
+  for (j=0;j<argc;j++)
+    printf("argv[%d] = %s.\n",j,argv[j]);
+  exit(EXIT_SUCCESS);
+}
