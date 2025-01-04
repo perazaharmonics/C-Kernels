@@ -1,0 +1,46 @@
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <tlpi_hdr.h>
+
+#ifndef BUF_SIZE                        // Allow "cc -D" to override definition
+#define BUF_SIZE 1024
+#endif
+
+int main (int argc, char* argv[])
+{
+  int fd_in,fd_out,flags;               // fd_in=1, fd_out=2, flags=read,write,creat,etc.
+  mode_t fPerms;                        // File permissions
+  ssize_t nBytes;                       // The Bytes read.
+  char buf[BUF_SIZE];                   // The input buffer.
+  
+  if (argc != 3 || strcmp(argv[1],"--help")==0)
+    usageErr("%s old-file new-file.\n",argv[0]);
+  
+    // -------------------------------- //
+    // Open input and output files.
+    // -------------------------------- //
+  fd_in=open(argv[1],O_RDONLY);       // The file to read.
+  if (fd_in==-1)                        // Did we open the file?
+    errExit("Opening file %s.\n",argv[1]);// No, that's an error.
+  flags=O_CREAT | O_WRONLY | O_TRUNC;   // Create, Write, Truncate.
+  fPerms=S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP |
+         S_IROTH | S_IWOTH;             // rw-rw-rw-
+  fd_out=open(argv[2],flags,fPerms);    // The file to write.
+    // -------------------------------- //
+    // Transfer data until we encounter end of input (EOF) or an error.
+    // -------------------------------- //
+  while ((nBytes=read(fd_in,buf,BUF_SIZE) > 0))
+    if(write(fd_out,buf,nBytes) != nBytes)
+      fatal("Write() returned error or partial write occurred.\n");
+    // -------------------------------- //
+    // Check for errors in the file transfer process.
+    // -------------------------------- //    
+  if (nBytes == -1 )
+    errExit("read");
+  if (close(fd_in) == -1)
+    errExit("close input");
+  if (close(fd_out) == -1)
+    errExit("close output");
+  
+  exit(EXIT_SUCCESS);
+}
