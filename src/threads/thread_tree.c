@@ -239,68 +239,82 @@ void FixDelete (
     TreeNode* w = NULL;                 // The sibling of the node to fix.
     if (p->parent != NULL) {            // Ensure p->parent is not NULL.
       if (p == p->parent->left) {       // Is the node the left child of its parent?
-        w = p->parent->right;           // The sibling is the right child.
-      } else {                          // Otherwise, it is the right child.
-        w = p->parent->left;            // The sibling is the left child.
-      }
-    }
-    if (w == NULL) {                    // If the sibling is NULL, break the loop.
-      break;
-    }
+        w = p->parent->right;           // No, the sibling is the right child.
+      } else {                          // Otherwise, it is the left child.
+        w = p->parent->left;            // Yes, set sibling as left child.
+      }                                 // Done setting sibling as left child.                                
+    }                                   // Done with existence of parent.
+    if (w == NULL) {                    // Is the sibling NULL?
+      break;                            // Yes, so break from the while loop.                     
+    }                                   // Done checking for leaf brother.
     if (w->color == RED) {              // Is the sibling red?
       w->color = BLACK;                 // Set the sibling to black.
       p->parent->color = RED;           // Set the parent to red.
-      if (p == p->parent->left) {       // Rotate based on the position of p.
-        LeftRotate(tree, p->parent);    // Rotate the tree to the left.
+      // ------------------------------ //
+      // Now we have to rotate based on the position of p
+      // ------------------------------ //
+      if (p == p->parent->left) {       // Is p it's parent's left uncle?
+        LeftRotate(tree, p->parent);    // Yes, rotate the tree to the left.
         w = p->parent->right;           // Update the sibling.
-      } else {
+      } else {                          // Else, it is its right uncle.                
         RightRotate(tree, p->parent);   // Rotate the tree to the right.
         w = p->parent->left;            // Update the sibling.
-      }
-    }
+      }                                 // Done with right uncle.
+    }                                   // Done with p-based rotation.
+    // -------------------------------- //
+    // Now we have to enfore color rules of the tree.
+    // Are the left and right child of the sibling NULL and BLACK?
+    // -------------------------------- //
     if ((w->left == NULL || w->left->color == BLACK) &&
-        (w->right == NULL || w->right->color == BLACK)) {
-      w->color = RED;                   // Set the sibling to red.
-      p = p->parent;                    // Move up the tree.
-    } else {
-      if (p == p->parent->left) {       // If p is the left child.
+        (w->right == NULL || w->right->color == BLACK)) 
+    {
+      w->color = RED;                   // Yes, set the sibling to red.
+      p = p->parent;                    // Move p up the tree.
+    } else {                            // Else they are not one of those.
+      if (p == p->parent->left) {       // Is p the left child?
+        // ---------------------------- //
+        // Is w's right child NULL or BLACK?
+        // ---------------------------- //
         if (w->right == NULL || w->right->color == BLACK) {
-          if (w->left != NULL) {
-            w->left->color = BLACK;     // Set the left child of the sibling to black.
-          }
+          if (w->left != NULL) {        // .. and left child not NULL?
+            w->left->color = BLACK;     // Yes, set the left child of the sibling to black.
+          }                             // Done setting left child of the sibling to black.
           w->color = RED;               // Set the sibling to red.
           RightRotate(tree, w);         // Rotate the tree to the right.
           w = p->parent->right;         // Update the sibling.
-        }
+        }                               // Done handling if right child NULL or BLACK.
         w->color = p->parent->color;    // Set the sibling's color to the parent's color.
         p->parent->color = BLACK;       // Set the parent to black.
-        if (w->right != NULL) {
+        if (w->right != NULL) {         // Is the right child NULL?
           w->right->color = BLACK;      // Set the right child of the sibling to black.
-        }
+        }                               // Done checking if right child NULL?   
         LeftRotate(tree, p->parent);    // Rotate the tree to the left.
         p = tree->root;                 // Set p to the root.
       } else {                          // If p is the right child.
+        // ---------------------------- //
+        // Is the left child NULL or BLACK?
+        // ---------------------------- //
         if (w->left == NULL || w->left->color == BLACK) {
-          if (w->right != NULL) {
-            w->right->color = BLACK;    // Set the right child of the sibling to black.
-          }
+          if (w->right != NULL) {       // Is the right child NULL?
+            w->right->color = BLACK;    // No, set the right child of the sibling to black.
+          }                             // Done checking if right child not a leaf.
           w->color = RED;               // Set the sibling to red.
           LeftRotate(tree, w);          // Rotate the tree to the left.
           w = p->parent->left;          // Update the sibling.
-        }
+        }                               // Done handling leafy left child or black.
         w->color = p->parent->color;    // Set the sibling's color to the parent's color.
         p->parent->color = BLACK;       // Set the parent to black.
-        if (w->left != NULL) {
-          w->left->color = BLACK;       // Set the left child of the sibling to black.
-        }
+        if (w->left != NULL) {          // Is the left child NULL?
+          w->left->color = BLACK;       // No, set the left child of the sibling to black.
+        }                               // Done checking if left child not a leaf.
         RightRotate(tree, p->parent);   // Rotate the tree to the right.
         p = tree->root;                 // Set p to the root.
-      }
-    }
-  }
-  if (p != NULL) {
-    p->color = BLACK;                   // Set the node to black.
-  }
+      }                                 // Done checking if p is the right child.
+    }                                   // Done checking if left or right child NULL or BLACK.
+  }                                     // Done with while p is not root and p is NULL or BLACK
+  if (p != NULL) {                      // Is p NULL?
+    p->color = BLACK;                   // No, set the node to black.
+  }                                     // Done checking if p is NULL.
 }                                       // ------------- FixDelete --------------
 
 // A function to fix tree after insertion
